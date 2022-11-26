@@ -1,5 +1,7 @@
 import { userDto } from "../@type/user"
 import { basicResponse,resultResponse } from "../config/response";
+import User from "../models/user";
+import bcrypt from "bcrypt";
 
 const emailRegex = /^[\w\.]+@[\w](\.?[\w])*\.[a-z]{2,3}$/i;
 const passwordRegex = /^(?=.*[a-z])(?=.*\d)(?=.*\W).{8,16}$/i;
@@ -20,8 +22,23 @@ const AccountService = {
             return basicResponse('비밀번호는 영어, 숫자, 특수문자 혼용 8자 이상이어야 합니다.',400);
         } 
         else{
-            // 회원가입 로직 추가
-            return resultResponse("test",200,{"name":"장병희","age":13});
+
+            // 유저 검증
+            const foundUser = await User.findOne({email});
+
+            if (foundUser) return basicResponse('이미 가입한 유저입니다.',409)
+
+            // 비밀번호 암호화
+            const saltRound = 10;
+            const salt = await bcrypt.genSalt(saltRound);
+            const hashedPassword = await bcrypt.hash(password,salt);
+            
+            // 유저 저장
+            const newUser = await new User({email:email,password:hashedPassword}).save();
+            console.log(hashedPassword);
+
+            return resultResponse("회원 가입 성공",200,{"email":email,"id":newUser.id});
+
         }
         
     },
