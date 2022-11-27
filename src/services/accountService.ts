@@ -11,8 +11,10 @@ const AccountService = {
     signUp: async (user:userDto) => {
         const email = user.email.trim();
         const password = user.password.trim();
+        const {nickname,birth,gender} = user;
 
-        if (email == '' || password == ''){
+
+        if (email == '' || password == '' || nickname == '' || birth == undefined || gender == ''){
             return basicResponse('빈 문자열입니다.',400);
         } 
         else if(!emailRegex.test(email)) {
@@ -34,7 +36,7 @@ const AccountService = {
             const hashedPassword = await bcrypt.hash(password,salt);
             
             // 유저 저장
-            const newUser = await new User({email:email,password:hashedPassword}).save();
+            const newUser = await new User({email:email,password:hashedPassword,nickname,birth,gender}).save();
             console.log(hashedPassword);
 
             return resultResponse("회원 가입 성공",200,{"email":email,"id":newUser.id});
