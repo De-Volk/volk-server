@@ -1,7 +1,8 @@
-import { userDto } from "../@type/user"
+import { userDto, userLoginDto } from "../@type/user"
 import { basicResponse,resultResponse } from "../config/response";
 import User from "../models/user";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 const emailRegex = /^[\w\.]+@[\w](\.?[\w])*\.[a-z]{2,3}$/i;
 const passwordRegex = /^(?=.*[a-z])(?=.*\d)(?=.*\W).{8,16}$/i;
@@ -28,7 +29,7 @@ const AccountService = {
             // 유저 검증
             const foundUser = await User.findOne({email});
 
-            if (foundUser) return basicResponse('이미 가입한 유저입니다.',409)
+            if (foundUser) return basicResponse('이미 가입한 유저입니다.',409);
 
             // 비밀번호 암호화
             const saltRound = 10;
@@ -42,7 +43,50 @@ const AccountService = {
             return resultResponse("회원 가입 성공",200,{"email":email,"id":newUser.id});
 
         }
-        
+    
+    
+    },
+
+    login: async (user:userLoginDto) =>{
+        const {email,password} = user;
+
+        if (email == '' || password == ''){
+            return basicResponse('빈 문자열입니다.',400);
+        } else {
+
+            const foundUser = await User.findOne({email});
+
+            if (!foundUser) return basicResponse('존재하지 않는 계정입니다.',401);
+
+            const passwordCheck = await bcrypt.compare(password,foundUser.password);
+
+            if (!passwordCheck) return basicResponse('잘못된 비밀번호입니다.',401);
+
+            console.log(foundUser);
+
+            const accessToken = jwt.sign({
+                email:email,
+                id: foundUser._id,
+                nickname: foundUser.nickname
+            },
+            process.env.JWT_ACCESS_SECRET!,
+            {
+                expiresIn: "30m",
+                issuer: "Volk"
+            });
+
+            const refreshToken = jwt.sign({
+                id: foundUser._id,
+            },
+            process.env.JWT_REFRESH_SECRET!,
+            {
+                expiresIn: "7 days",
+                issuer: "Volk"
+            });
+
+            return resultResponse("로그인 성공",200,{email,nickname:foundUser.nickname,accessToken,refreshToken});
+        }
+
     },
 }
 

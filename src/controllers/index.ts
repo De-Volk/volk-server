@@ -8,7 +8,10 @@ router.get('/',(req:Request, res:Response)=>{
     res.json({"status":200,"data":"정상 동작"})
 });
 
-//회원가입
+// 회원가입
 router.post('/signup',account.signUp);
+
+// 로그인
+router.post('/login',account.login);
 
 export default router;
