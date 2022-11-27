@@ -6,3 +6,8 @@ export type userDto = {
     birth: Number,
     createdAt: Date,
 }
+
+export type userLoginDto = {
+    email: string;
+    password: string;
+}
