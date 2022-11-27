@@ -1,9 +1,8 @@
 export type userDto = {
     email: string;
     password: string;
-}
-
-export interface IUser{
-    email: string;
-    password: string;
+    nickname: String,
+    gender: String,
+    birth: Number,
+    createdAt: Date,
 }
