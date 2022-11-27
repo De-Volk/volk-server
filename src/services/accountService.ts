@@ -1,8 +1,9 @@
-import { userDto, userLoginDto } from "../@type/user"
+import { userDto, userLoginDto } from "../types/user"
 import { basicResponse,resultResponse } from "../config/response";
 import User from "../models/user";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import jwtService from "../auth/jwtService";
+
 
 const emailRegex = /^[\w\.]+@[\w](\.?[\w])*\.[a-z]{2,3}$/i;
 const passwordRegex = /^(?=.*[a-z])(?=.*\d)(?=.*\W).{8,16}$/i;
@@ -62,27 +63,8 @@ const AccountService = {
 
             if (!passwordCheck) return basicResponse('잘못된 비밀번호입니다.',401);
 
-            console.log(foundUser);
-
-            const accessToken = jwt.sign({
-                email:email,
-                id: foundUser._id,
-                nickname: foundUser.nickname
-            },
-            process.env.JWT_ACCESS_SECRET!,
-            {
-                expiresIn: "30m",
-                issuer: "Volk"
-            });
-
-            const refreshToken = jwt.sign({
-                id: foundUser._id,
-            },
-            process.env.JWT_REFRESH_SECRET!,
-            {
-                expiresIn: "7 days",
-                issuer: "Volk"
-            });
+            const accessToken = await jwtService.issueAccessToken(foundUser.email,foundUser._id,foundUser.nickname);
+            const refreshToken = await jwtService.issueRefreshToken(foundUser._id);
 
             return resultResponse("로그인 성공",200,{email,nickname:foundUser.nickname,accessToken,refreshToken});
         }
