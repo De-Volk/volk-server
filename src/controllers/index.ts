@@ -1,11 +1,12 @@
 import express, {Request,Response,Router} from "express";
 import account from "./accountControl";
 import jwtService from "../auth/jwtService";
+import { CustomMiddleWareModel } from "../types/CustomMiddleWareModel";
 
 const router:Router = express.Router();
 
 // 정상 동작 확인
-router.get('/',jwtService.getUserInfoFromToken,(req:any, res:Response)=>{
+router.get('/',jwtService.getUserInfoFromToken,(req:CustomMiddleWareModel, res:Response)=>{
     res.json({"status":200,"data":"정상 동작"})
 });
 
