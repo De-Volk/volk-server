@@ -1,15 +1,17 @@
-import mongoose from "mongoose";
-import {IUser} from "../@type/user";
+import mongoose from 'mongoose';
 
-const UserSchema = new mongoose.Schema({
-    email:{
-        type:String,
-        unique: true,
-    },
-    
-    password:{
-        type:String,
-    },
+const Schema = mongoose.Schema;
+
+const UserSchema = new Schema({
+  id: { type: String, required: true, unique: true, maxlength: 20 },
+  password: { type: String, required: true, maxlength: 30 },
+  nickname: { type: String, required: true, maxlength: 20 },
+  email: { type: String, required: true, maxlength: 30 },
+  gender: { type: String, require: true },
+  birth: { type: Number, required: true },
+  createdAt: { type: Date, default: new Date() },
 });
 
-export default mongoose.model<IUser&mongoose.Document>("User",UserSchema);
+const User = mongoose.models.User || mongoose.model('User', UserSchema);
+
+export default User;

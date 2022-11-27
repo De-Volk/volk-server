@@ -1,25 +1,19 @@
-import express from "express";
-import controller from "./src/controllers";
-import dotenv from "dotenv";
-import mongoose from "mongoose";
-
-dotenv.config();
+import express from 'express';
+import cors from 'cors';
+import mongoose from 'mongoose';
 
 const app = express();
-const {PORT, MONGO_URI} = process.env;
-
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true}));
-app.use('/',controller);
+app.use(express.urlencoded({ extended: true }));
+app.use(cors({ origin: '*', credentials: true }));
 
-//CONNECTnpm TO MONGODB SERVER
-mongoose
-  .connect(MONGO_URI!)
-  .then(() => console.log('Successfully connected to mongodb'))
-  .catch(e => console.error(e));
+mongoose.connect('mongodb://localhost:27017/volk', {});
+const db = mongoose.connection;
 
-app.listen(PORT, ()=>{
-    console.log("서버 가동");
-    console.log("http://localhost:"+PORT);
-})
+db.once('open', () => console.log('mongoose connected'));
+db.on('error', (error) => console.error('DB Error', error));
+
+app.listen('8000', () => {
+  console.log('server start');
+});
