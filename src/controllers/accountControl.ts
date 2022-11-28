@@ -1,10 +1,11 @@
 import {Request,Response} from "express";
 import AccountService from "../services/accountService";
+import { userDto } from "../types/user";
 
 const account = {
     
     signUp: async (req:Request, res:Response) => {
-        const userDTO = req.body;
+        const userDTO:userDto = req.body;
         const result = await AccountService.signUp(userDTO);
 
         res.status(result.status).json(result);

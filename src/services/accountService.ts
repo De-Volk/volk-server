@@ -14,11 +14,12 @@ const AccountService = {
         const email = user.email.trim();
         const password = user.password.trim();
         const {nickname,birth,gender} = user;
+        const checkList = {email,password,nickname,birth,gender};
 
-        const errorKey = Object.entries(user).filter(([key,value]) => (value === "" || value === undefined)).map((value)=>value[0]);
+        const errorKey = Object.entries(checkList as userDto).filter(([key,value]) => (value === "" || value === undefined || value === null)).map((value)=>value[0]);
         
         if (errorKey.length > 0){
-            return basicResponse('해당('+errorKey+') 값의 입력이 없습니다.',400);
+            return basicResponse(errorKey+' 값의 입력이 없습니다.',400);
         } 
         else if(!emailRegex.test(email)) {
             return basicResponse('잘못된 이메일 형식입니다.',400);
@@ -37,7 +38,7 @@ const AccountService = {
             const saltRound = 10;
             const salt = await bcrypt.genSalt(saltRound);
             const hashedPassword = await bcrypt.hash(password,salt);
-            
+
             // 유저 저장
             const newUser = await new User({email:email,password:hashedPassword,nickname,birth,gender}).save();
 
@@ -49,10 +50,12 @@ const AccountService = {
     },
 
     login: async (user:userLoginDto) =>{
-        const {email,password} = user;
 
-        if (email == '' || password == ''){
-            return basicResponse('빈 문자열입니다.',400);
+        const {email,password} = user;
+        const errorKey = Object.entries(user).filter(([key,value]) => (value === "" || value === undefined || value === null)).map((value)=>value[0]);
+        
+        if (errorKey.length>0){
+            return basicResponse(errorKey+'가 없습니다.',400);
         } else {
 
             const foundUser = await User.findOne({email});
