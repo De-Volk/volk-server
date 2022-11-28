@@ -1,9 +1,9 @@
 export type userDto = {
     email: string;
     password: string;
-    nickname: String,
-    gender: String,
-    birth: Number,
+    nickname: string,
+    gender: string,
+    birth: number,
     createdAt: Date,
 }
 
