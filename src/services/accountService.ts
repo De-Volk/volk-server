@@ -15,9 +15,10 @@ const AccountService = {
         const password = user.password.trim();
         const {nickname,birth,gender} = user;
 
-
-        if (email == '' || password == '' || nickname == '' || birth == undefined || gender == ''){
-            return basicResponse('빈 문자열입니다.',400);
+        const errorKey = Object.entries(user).filter(([key,value]) => (value === "" || value === undefined)).map((value)=>value[0]);
+        
+        if (errorKey.length > 0){
+            return basicResponse('해당('+errorKey+') 값의 입력이 없습니다.',400);
         } 
         else if(!emailRegex.test(email)) {
             return basicResponse('잘못된 이메일 형식입니다.',400);
@@ -39,7 +40,6 @@ const AccountService = {
             
             // 유저 저장
             const newUser = await new User({email:email,password:hashedPassword,nickname,birth,gender}).save();
-            console.log(hashedPassword);
 
             return resultResponse("회원 가입 성공",200,{"email":email,"id":newUser.id});
 
