@@ -1,7 +1,7 @@
 import express, {Request,Response,Router} from "express";
 import account from "./accountControl";
 import jwtService from "../auth/jwtService";
-import { CustomMiddleWareModel } from "../types/CustomMiddleWareModel";
+import { CustomMiddleWareModel } from "../types/CustomTypes";
 
 const router:Router = express.Router();
 
