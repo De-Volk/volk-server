@@ -2,19 +2,10 @@ import {NextFunction, Request, Response} from "express";
 import jwt from "jsonwebtoken";
 import { CustomMiddleWareModel } from "../types/CustomMiddleWareModel";
 
-const extractAccessToken = (req:Request) =>{
+const extractToken = (auth:string) =>{
     const TOKEN_PREFIX = "Bearer";
-    const auth = req.headers.authorization;
     const token = auth?.includes(TOKEN_PREFIX) ? auth.split(TOKEN_PREFIX)[1]:auth;
     return token;
-}
-
-const extractRefreshToken = (req:Request) =>{
-    const TOKEN_PREFIX = "Bearer";
-    const auth  = (req.headers.refreshtoken as string);
-    const token = auth?.includes(TOKEN_PREFIX) ? auth.split(TOKEN_PREFIX)[1]:auth;
-    return token;
-
 }
 
 const createAccessToken = async (email:string,id:string,nickname:string) =>{
@@ -43,15 +34,15 @@ const createRefreshToken = async (id:string) =>{
 
 const jwtTokenProvider ={
     getUserInfoFromToken: async (req:CustomMiddleWareModel,res:Response,next:NextFunction) =>{
-        const token = extractAccessToken(req);
+        const token = extractToken(req.headers.authorization!);
         if (!token) return res.status(400).json({status:400,message: "인증을 위한 토큰이 존재하지 않습니다."});
 
         try{
             
-            const decodedToken = jwt.verify(token!, process.env.JWT_ACCESS_SECRET!);
-            req.email = (decodedToken as CustomMiddleWareModel)?.email;
-            req.id = (decodedToken as CustomMiddleWareModel)?.id;
-            req.nickname = (decodedToken as CustomMiddleWareModel)?.nickname;
+            const decodedToken:any = jwt.verify(token!, process.env.JWT_ACCESS_SECRET!);
+            req.email = decodedToken?.email;
+            req.id = decodedToken?.id;
+            req.nickname = decodedToken?.nickname;
             next()
 
         } catch(error:any){
@@ -65,21 +56,21 @@ const jwtTokenProvider ={
     },
     
     reissueToken: async (req:Request,res:Response) => {
-        const accessToken = extractAccessToken(req);
+        const accessToken = extractToken(req.headers.authorization!);
         if (!accessToken) return res.status(400).json({status:400,message: "인증을 위한 A토큰이 존재하지 않습니다."});
 
-        const refreshToken = extractRefreshToken(req);
+        const refreshToken = extractToken((req.headers.refreshtoken as string));
         if (!refreshToken) return res.status(400).json({status:400,message: "인증을 위한 R토큰이 존재하지 않습니다."});
         
         try{
 
-            const decodedAccessToken = jwt.verify(accessToken!, process.env.JWT_ACCESS_SECRET!);
-            const decodedRefreshToken = jwt.verify(refreshToken!, process.env.JWT_REFRESH_SECRET!);
+            const decodedAccessToken:any = jwt.verify(accessToken!, process.env.JWT_ACCESS_SECRET!);
+            const decodedRefreshToken:any = jwt.verify(refreshToken!, process.env.JWT_REFRESH_SECRET!);
 
-            if((decodedAccessToken as any)?.id == (decodedRefreshToken as any)?.id){
-                const email = (decodedAccessToken as any)?.email;
-                const id = (decodedAccessToken as any)?.id;
-                const nickname = (decodedAccessToken as any)?.nickname;
+            if(decodedAccessToken?.id == decodedRefreshToken?.id){
+                const email = decodedAccessToken?.email;
+                const id = decodedAccessToken?.id;
+                const nickname = decodedAccessToken?.nickname;
     
                 const accessToken = await createAccessToken(email,id,nickname);
                 const refreshToken = await createRefreshToken(id);
