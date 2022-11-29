@@ -7,7 +7,7 @@ const router:Router = express.Router();
 
 // 정상 동작 확인
 router.get('/',jwtService.getUserInfoFromToken,(req:CustomRequest, res:Response)=>{
-    res.json({"status":200,"data":"정상 동작"})
+    res.json({"status":200,"data":"정상 동작","email":req.email,"id":req.id,"nickname":req.nickname});
 });
 
 // 회원가입

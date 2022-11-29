@@ -4,7 +4,8 @@ import { CustomRequest, CustomJwtPayload } from "../types/CustomTypes";
 
 const extractToken = (auth:string) =>{
     const TOKEN_PREFIX = "Bearer";
-    const token = auth?.includes(TOKEN_PREFIX) ? auth.split(TOKEN_PREFIX)[1]:auth;
+    const token = auth?.includes(TOKEN_PREFIX) ? auth.split(TOKEN_PREFIX)[1].trim():auth.trim();
+    console.log(token);
     return token;
 }
 
